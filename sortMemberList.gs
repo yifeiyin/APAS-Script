@@ -17,8 +17,9 @@ var COL_ROLEANDTEAMSTARTS = 7
 var memberList
 
 // Stores all team names found in the raw spreadsheet
-var teamNames
+var allTeamNames
 
+var teams
 
   // Role and Team must go together (error)
   // Everyone should have a name (error)
@@ -32,8 +33,10 @@ var teamNames
 
 function test() {
   initializeMemberList()
-  // printMemberList()
+  //printMemberList()
   FindAllTeamNames()
+  InitializeTeams()
+  printTeams()
 }
 
 
@@ -41,36 +44,73 @@ function test() {
 function printMemberList() {
   for (var iMember = 0; iMember < memberList.length; iMember++) {
     var theMember = memberList[iMember]
-    var s = theMember[COL_EMAIL] + " " + theMember[COL_NAME] + ": "
-    for (var iProperty = 7; iProperty < theMember.length; iProperty++) {
-      s += String(theMember[iProperty]) + " "
+    var s = theMember.email + " " + theMember.name + ": "
+    for (var i = 0; i < theMember.roles.length; i++) {
+      s += String(theMember.roles[i].position) + " " + String(theMember.roles[i].teamName)
     }
     Logger.log(s)
   }
 }
 
+// For debug only, print teams
+function printTeams() {
+  for (teamName in teams) {
+    info("======== " + teamName + " ========")
+    var theTeam = teams[teamName]
+    
+    info("    ---- Leaders " + String(theTeam.leaders.length) + " ----")
+    for (var i = 0; i < theTeam.leaders.length; i++) 
+      info("      " + theTeam.leaders[i]) 
+    
+    info("    ---- Members " + String(theTeam.members.length) + " ----")
+    for (var i = 0; i < theTeam.members.length; i++) 
+      info("      " + theTeam.members[i]) 
+  }
+  
+}
+
+function InitializeTeams() {
+  teams = {}
+  for (var i = 0; i < allTeamNames.length; i++) {
+    theTeamName = allTeamNames[i]
+    teams[theTeamName] = {}
+    teams[theTeamName].leaders = []
+    teams[theTeamName].members = []
+    
+    for (var iMember = 0; iMember < memberList.length; iMember++) {
+      theMember = memberList[iMember]
+      for (var iRole = 0; iRole < theMember.roles.length; iRole++) {
+        if (theMember.roles[iRole].teamName == theTeamName) {
+          var positionName = theMember.roles[iRole].position
+          if (positionName == "Leader") {
+            teams[theTeamName].leaders.push(theMember.name)
+          } else if (positionName == "Member") {
+            teams[theTeamName].members.push(theMember.name)
+          } else {
+            error("Illegal position name: " + positionName)
+          }
+        }
+      } // End for iRole
+    } // End for iMember
+  } // End for i
+} // End function
 
 // Initialize variable teamNames
 function FindAllTeamNames() {
-  teamNames = []
+  allTeamNames = []
   
   // Looping through all the members
   for (var iMember = 0; iMember < memberList.length; iMember++) {
     var theMember = memberList[iMember]
-    var rolesCount = theMember[COL_NROLES]
+    var rolesCount = theMember.roles.length
     
-    // Looping through the "roles and teams"
     for (var i = 0; i < rolesCount; i++) {
-      var roleName = theMember[COL_ROLEANDTEAMSTARTS + i * 0]
-      var teamName = theMember[COL_ROLEANDTEAMSTARTS + i * 0 + 1]
+      var positionName = theMember.roles[i].position
+      var teamName = theMember.roles[i].teamName
       
       // Adding non-existing team names to the teamNames variable.
-      if (teamNames.indexOf(teamName) < 0) { teamNames.push(teamName) }
+      if (allTeamNames.indexOf(teamName) < 0) { allTeamNames.push(teamName) }
     }
-  }
-  
-  for (var i = 0; i < teamNames.length; i++) {
-    debug(String(i) + " " +  teamNames[i])
   }
 }
 
@@ -84,18 +124,28 @@ function initializeMemberList() {
   assert(mlssRange != undefined, "cannot find the actual values range")
   var mlssValues = mlssRange.getValues()
   
-  memberList = new Array(1)
+  memberList = []
+  
   for (var r = 0; r < mlssValues.length; r++) {
     // info("----" + r + " " + mlssValues[r][0])
     if (mlssValues[r][0] == "") {
       info("" + String(r-1) + " MEMBERS LOADED.")
       break
     }
-    memberList.length = r + 1
-    memberList[r] = new Array(COLUMN_MAX)
-    for (var c = 0; c < COLUMN_MAX; c++) {
-      memberList[r][c] = mlssValues[r][c]
+    
+    // Here, we defined what properties should member have
+    var member = {}
+    member.name = mlssValues[r][COL_NAME]
+    member.email = mlssValues[r][COL_EMAIL]
+    member.roles = []
+    member.formLinks = []
+    for (var i = 0; i < mlssValues[r][COL_NROLES]; i++) {
+      var role = {}
+      role.position = mlssValues[r][COL_ROLEANDTEAMSTARTS + i * 2]
+      role.teamName = mlssValues[r][COL_ROLEANDTEAMSTARTS + i * 2 + 1]
+      member.roles.push(role)
     }
+    memberList.push(member)
   }
   
 }
