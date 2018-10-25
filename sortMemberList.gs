@@ -19,16 +19,7 @@ var memberList
 // Stores all team names found in the raw spreadsheet
 var allTeamNames
 
-var teams
-
-  // Role and Team must go together (error)
-  // Everyone should have a name (error)
-  // Everyone should have a role (warning)
-  // Email address must be valid (warning)
-  // Role must be one of "Member" or "Leader" (error)
-  
-  // Postponed: Team must be one of the names in the list (warning)
-
+var teamList
 
 
 function test() {
@@ -36,7 +27,8 @@ function test() {
   //printMemberList()
   FindAllTeamNames()
   InitializeTeams()
-  printTeams()
+  //printTeams()
+  validateMemberList()
 }
 
 
@@ -52,11 +44,11 @@ function printMemberList() {
   }
 }
 
-// For debug only, print teams
+// For debug only, print teamList
 function printTeams() {
-  for (teamName in teams) {
+  for (teamName in teamList) {
     info("======== " + teamName + " ========")
-    var theTeam = teams[teamName]
+    var theTeam = teamList[teamName]
     
     info("    ---- Leaders " + String(theTeam.leaders.length) + " ----")
     for (var i = 0; i < theTeam.leaders.length; i++) 
@@ -69,23 +61,49 @@ function printTeams() {
   
 }
 
+function validateMemberList() {
+  
+  // Everyone should have a role
+  for (var iMember = 0; iMember < memberList.length; iMember++) {
+      if (memberList[iMember].roles.length == 0) {
+        warning(quotes(memberList[iMember].name) + " has no roles.")
+      }
+  }
+  
+  // Every team should have only one leader and should have members
+  for (var teamName in teamList) {
+    var theTeam = teamList[teamName]
+    
+    if (theTeam.leaders.length == 0)
+      warning(teamName + " has no leaders.")
+      
+    if (theTeam.leaders.length > 1)
+      warning(teamName + " has " + String(theTeam.leaders.length) + " leaders.")
+      
+    if (theTeam.members.length == 0)
+      warning(teamName + " has no members.")
+    
+    }
+}
+
 function InitializeTeams() {
-  teams = {}
+  teamList = {}
   for (var i = 0; i < allTeamNames.length; i++) {
     theTeamName = allTeamNames[i]
-    teams[theTeamName] = {}
-    teams[theTeamName].leaders = []
-    teams[theTeamName].members = []
+    teamList[theTeamName] = {}
+    teamList[theTeamName].leaders = []
+    teamList[theTeamName].members = []
     
     for (var iMember = 0; iMember < memberList.length; iMember++) {
       theMember = memberList[iMember]
+      
       for (var iRole = 0; iRole < theMember.roles.length; iRole++) {
         if (theMember.roles[iRole].teamName == theTeamName) {
           var positionName = theMember.roles[iRole].position
           if (positionName == "Leader") {
-            teams[theTeamName].leaders.push(theMember.name)
+            teamList[theTeamName].leaders.push(theMember.name)
           } else if (positionName == "Member") {
-            teams[theTeamName].members.push(theMember.name)
+            teamList[theTeamName].members.push(theMember.name)
           } else {
             error("Illegal position name: " + positionName)
           }

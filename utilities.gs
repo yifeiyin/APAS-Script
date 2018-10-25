@@ -1,13 +1,17 @@
 function info(msg) {
-  Logger.log("INFO: " + msg)
+  Logger.log("INFO: \t\t" + msg)
 }
 
 function debug(msg) {
-  Logger.log("DEBUG: " + msg)
+  Logger.log("DEBUG: \t\t" + msg)
 }
 
 function error(msg) {
-  Logger.log("ERROR: " + msg)
+  Logger.log("ERROR: \t\t" + msg + "! == ! == ! == ! == ! == ! == !")
+}
+
+function warning(msg) {
+  Logger.log("WARNING: \t" + msg)
 }
 
 function assert(exp, msg) {
@@ -15,4 +19,8 @@ function assert(exp, msg) {
     error(msg)
     var x = 1 / 0
   }
+}
+
+function quotes(str) {
+  return '"' + str + '"'
 }
