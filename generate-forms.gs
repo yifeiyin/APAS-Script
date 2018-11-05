@@ -1,4 +1,3 @@
-
 function generate_forms_main_test() {
   prepareConstants()
   
@@ -17,7 +16,6 @@ function generate_forms_main_test() {
   }
   
   saveMemberList(CURRENT_DATE + " Forms-Generated Spreadsheet")
-  
 }
 
 
@@ -48,14 +46,10 @@ function _isTimeUp() {
 }
 
 
-
 function generateForms(folderName, destinationSsFile) {
-
   
   for (var iMember = 0; iMember < memberList.length; iMember++) { // Change the value to memberList.length
-    
     if (_isTimeUp()) { throw "Time is almost up. Exiting." }
-    
     
     var member = memberList[iMember];
 
@@ -66,11 +60,10 @@ function generateForms(folderName, destinationSsFile) {
     
     for (var iRole = 0; iRole < member.roles.length; iRole++) {
       var role = member.roles[iRole];
-      
+    
       // Don't generate a form if:
       // (1) The person does not have a role in any team (achieved in previous scope)
       // (2) The team the person is in has no members
-      
       if (role.position == "Member" && teamList[role.teamName].leaders.length != 1) {
         info(quotes(member.name) + " is in " + quotes(role.teamName) + " which has an unexpected leader count: "+ String(teamList[role.teamName].leaders.length) + ". Skipping.");
         continue;
@@ -98,7 +91,7 @@ function generateForms(folderName, destinationSsFile) {
                 "或者有任何其他问题、意见或建议，可直接在钉钉上联系 Yifei。😜";
       var formConfirmationMessage = "谢谢使用。";
       
-      
+     
       var form = createForm(folderName, formFileName + possibleSuffix)
       form.setTitle(formTitle)
           .setDescription(formDescription)
@@ -124,9 +117,6 @@ function generateForms(folderName, destinationSsFile) {
 
 
 
-
-
-
 function _generateFormContentForLeader(form, member, role) {
   var teamMemberNames = teamList[role.teamName].members;
   
@@ -141,8 +131,6 @@ function _generateFormContentForLeader(form, member, role) {
       var gridItem = form.addGridItem();
       var gridValidation = FormApp.createGridValidation().requireLimitOneResponsePerColumn().build();
       
-      
-      
       gridItem
       .setRequired(true)
       .setTitle(memberName)
@@ -154,7 +142,6 @@ function _generateFormContentForLeader(form, member, role) {
       .setRows(row_texts);
     }
   }
-  
   
   // Section n+1: Bonus
   {
@@ -169,7 +156,6 @@ function _generateFormContentForLeader(form, member, role) {
     // Core Information
     checkBoxItem
     .setChoiceValues(teamMemberNames);
-    
   }
   
 
@@ -183,14 +169,8 @@ function _generateFormContentForLeader(form, member, role) {
 }
 
 
-
-
-
-
-
 function _generateFormContentForMember(form, member, role) {
   var teamLeaders = teamList[role.teamName].leaders
-  
   
   // Section 1: Rate for the leader (5 categories)
   {
@@ -213,7 +193,6 @@ function _generateFormContentForMember(form, member, role) {
     .setRows(row_texts)
   }
   
-  
   // Section 2: Additional Comments
   {
     var paraTextItem = form.addParagraphTextItem();
@@ -221,6 +200,5 @@ function _generateFormContentForMember(form, member, role) {
     .setRequired(false)
     .setTitle("补充信息（可选）");
   }
-  
 }
 
