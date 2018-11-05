@@ -16,5 +16,5 @@ The process of collecting data seems a little tedious. Each form has its own "sh
 
 # License
 
-This repo is licensed as [Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)](https://creativecommons.org/licenses/by-nc/4.0/).
+This repo is under GNU General Public License v3.0.
 
