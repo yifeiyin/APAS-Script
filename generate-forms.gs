@@ -180,17 +180,16 @@ function _generateFormContentForMember(form, member, role) {
     var column_texts = ["N/A", "F", "C", "B-", "B", "B+", "A-", "A"]
     
     var gridItem = form.addGridItem()
-    var gridValidation = FormApp.createGridValidation().requireLimitOneResponsePerColumn().build()
+    // var gridValidation = FormApp.createGridValidation().requireLimitOneResponsePerColumn().build() // One respones per COLUMN, should not be used here
     
     gridItem
     .setRequired(true)
     .setTitle(leaderName)
     .setHelpText("给" + role.teamName + "的 leader " + cquotes(leaderName) + "打分")
-    .setValidation(gridValidation)
     
     gridItem
     .setColumns(column_texts)
-    .setRows(row_texts)
+    .setRows(row_texts);
   }
   
   // Section 2: Additional Comments
