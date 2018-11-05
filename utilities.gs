@@ -25,3 +25,6 @@ function quotes(str) {
   return '"' + str + '"';
 }
 
+function cquotes(str) {
+  return "「" + str + "」";
+}

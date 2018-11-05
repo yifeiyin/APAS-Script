@@ -7,7 +7,7 @@ var APAS_WORKING_FOLDER_ID = "1odbTvpwksnSYvZ8RapMSXKVHJQh3TBkf";
 
 var DEBUG_MODE = true;
 
-var CURRENT_MONTH = "SEP";
+var CURRENT_MONTH = "OCT";
 var CURRENT_YEAR = "2018";
 
 
@@ -17,10 +17,14 @@ var CURRENT_YEAR = "2018";
 var CURRENT_MODE = "";
 var CURRENT_DATE = "";
 
-function perpareConstants() {
+var _program_start_time;
+
+function prepareConstants() {
+  _program_start_time = new Date();
   if (DEBUG_MODE) { CURRENT_MODE = "debug"; } else { CURRENT_MODE = "deployed"; }
   
-  CURRENT_DATE = CURRENT_YEAR + CURRENT_MONTH;
+  CURRENT_DATE = CURRENT_MONTH + CURRENT_YEAR;
+  CURRENT_MONTH_CN = "十月";
 }
 
 // // // // // // // // // // // // // // // // // // // // 
@@ -60,12 +64,12 @@ function findOrCreateSpreadsheet(fileName) {
 }
 
 
-function findOrCreateDestinationSpreadsheet() {
-  const fileName = CURRENT_DATE + " - UTChinese APAS Raw Result"
-  resultSs = findOrCreateSpreadsheet(fileName)
-  info("func findOrCreateDestSs(): file: " + resultSs.getName())
-  return resultSs
-}
+//function findOrCreateDestinationSpreadsheet() {
+//  const fileName = CURRENT_DATE + " - UTChinese APAS Raw Result"
+//  resultSs = findOrCreateSpreadsheet(fileName)
+//  info("func findOrCreateDestSs(): file: " + resultSs.getName())
+//  return resultSs
+//}
 
 
 // // // // // // // // // // // // // // // // // // // // 
@@ -81,7 +85,7 @@ function findOrCreateDestinationSpreadsheet() {
 
 
 function main() {
-  perpareConstants()
+  prepareConstants()
   info("Hi")
   
   findOrCreateDestinationSpreadsheet()
@@ -91,7 +95,6 @@ function main() {
 
 
 // // // // // // // // // // // // // // // // // // // // 
-
 
 
 

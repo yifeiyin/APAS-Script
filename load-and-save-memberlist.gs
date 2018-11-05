@@ -39,20 +39,24 @@ var teamList;
 */
 
 
-function test() {
-  perpareConstants();
+function load_and_save_main_test() {
+  prepareConstants();
   
   var fileName = CURRENT_DATE + " Working Spreadsheet";
 
   loadMemberList("__original__");
-  saveMemberList(fileName);
-  
-  loadMemberList(fileName);
-  saveMemberList("test 4");
+  validateMemberList();
+  printTeams();
+//  saveMemberList(fileName);
+//  
+//  loadMemberList(fileName);
+//  saveMemberList("test 4");
 };
 
 
 function loadMemberList(from) {
+  info("Loading " + quotes(from) + "...")
+  
   if (from == "__original__") {
     loadMemberListFromOriginalSource();
   } else if (from[0] != "_") {
@@ -110,8 +114,9 @@ function loadWorkingSpreadsheet(fileName) {
 
 function saveWorkingSpreadsheet(fileName) {
   var outputSs = findOrCreateSpreadsheet(fileName);
-
+  
   var outputSheet = outputSs.getSheets()[0];
+  outputSheet.clearContents()
   
   var _date = new Date();
   var _timeInfo = _date.toLocaleTimeString();
@@ -244,7 +249,7 @@ function FindAllTeamNames() {
 
 // Initialize variable memberList
 function loadMemberListFromOriginalSource() {
-  var mlss = SpreadsheetApp.openById(MEMBER_LIST_SPREADSHEET_ID)  // mlss - memeber list spreadsheet
+  var mlss = SpreadsheetApp.openById(MEMBER_LIST_SPREADSHEET_ID)  // mlss - member list spreadsheet
   var mlssSheet = mlss.getSheets()[0]
   var mlssRange = mlssSheet.getRange(ACUTAL_VALUE_RANGE_MAX)
   
@@ -273,3 +278,4 @@ function loadMemberListFromOriginalSource() {
   }
   
 }
+
