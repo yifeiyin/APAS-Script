@@ -35,24 +35,62 @@ var teamList;
     values:      object team
         team.leaders    // Array of String, leaders' names
         team.members    // Array of String, members' names
-
 */
 
 
 function load_and_save_main_test() {
   prepareConstants();
   
-  var fileName = CURRENT_DATE + " Working Spreadsheet";
+  //var fileName = CURRENT_DATE + " Working Spreadsheet";
 
-  loadMemberList("__original__");
-  validateMemberList();
-  printTeams();
+//  loadMemberList("__original__");
+//  validateMemberList();
+//  printTeams();
+  
 //  saveMemberList(fileName);
-//  
-//  loadMemberList(fileName);
-//  saveMemberList("test 4");
+// 
+  
+//  loadMemberList("OCT2018 Forms-Generated Spreadsheet");
+//  storeMemberData();
+  
+  restoreMemberData();
+  
+  saveMemberList("test 4");
 };
 
+
+
+// ==================================
+// MARK: Store and Restore Member Data (using PropertiesService)
+// ==================================
+
+// Based on: https://stackoverflow.com/questions/34302070/how-can-i-store-and-retrieve-objects-from-google-apps-script-project-properties
+// TODO: Provide a method to export all data for backup purpose (maybe to a sperate json file)
+// TODO: Show the date of data restored
+function restoreMemberData() {
+  var memberListObj = PropertiesService.getScriptProperties().getProperty("memberList");
+  memberList = JSON.parse(memberListObj);
+  var allTeamNamesObj = PropertiesService.getScriptProperties().getProperty("allTeamNames");
+  allTeamNames = JSON.parse(allTeamNamesObj);
+  var teamListObj = PropertiesService.getScriptProperties().getProperty("teamList");
+  teamList = JSON.parse(teamListObj);
+  info("Member data restored.")
+  return [memberListObj, allTeamNamesObj, teamListObj];
+}
+function storeMemberData() {
+  PropertiesService.getScriptProperties()
+  .setProperty("memberList", JSON.stringify(memberList))
+  .setProperty("allTeamNames", JSON.stringify(allTeamNames))
+  .setProperty("teamList", JSON.stringify(teamList));
+  info("Member data stored.")
+  return [memberListObj, allTeamNamesObj, teamListObj];
+}
+
+
+
+// ==================================
+// MARK: Load and Save MemberList (from/to spreadsheet)
+// ==================================
 
 function loadMemberList(from) {
   info("Loading " + quotes(from) + "...")
@@ -72,11 +110,15 @@ function loadMemberList(from) {
   info( String(allTeamNames.length) + " teams were found.")
 }
 
-
 function saveMemberList(fileName) {
   saveWorkingSpreadsheet(fileName)
 }
 
+
+
+// ==================================
+// MARK: Backend functions for loading/saving memberlists
+// ==================================
 
 function loadWorkingSpreadsheet(fileName) {
   var ss = openSpreadsheet(fileName)
@@ -109,7 +151,6 @@ function loadWorkingSpreadsheet(fileName) {
     memberList.push(member);
   }
 }
-
 
 
 function saveWorkingSpreadsheet(fileName) {
@@ -172,7 +213,6 @@ function printTeams() {
 
 
 function validateMemberList() {
-  
   // Everyone should have a role
   for (var iMember = 0; iMember < memberList.length; iMember++) {
       if (memberList[iMember].roles.length == 0) {

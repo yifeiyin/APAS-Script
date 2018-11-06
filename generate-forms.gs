@@ -40,16 +40,12 @@ function createForm(folderName, formName) {
   return resultFile; 
 }
 
-function _isTimeUp() {
-  var now = new Date();
-  return now.getTime() - _program_start_time.getTime() > 280000; // 4 minutes 40 seconds
-}
 
 
 function generateForms(folderName, destinationSsFile) {
   
   for (var iMember = 0; iMember < memberList.length; iMember++) { // Change the value to memberList.length
-    if (_isTimeUp()) { throw "Time is almost up. Exiting." }
+    throwExceptionIfTimeIsAlmostUp();
     
     var member = memberList[iMember];
 
@@ -65,16 +61,18 @@ function generateForms(folderName, destinationSsFile) {
       // (1) The person does not have a role in any team (achieved in previous scope)
       // (2) The team the person is in has no members
       if (role.position == "Member" && teamList[role.teamName].leaders.length != 1) {
+        role.link = "# Unexpected leader count";
         info(quotes(member.name) + " is in " + quotes(role.teamName) + " which has an unexpected leader count: "+ String(teamList[role.teamName].leaders.length) + ". Skipping.");
         continue;
       }
       
       if (role.position == "Leader" && teamList[role.teamName].members.length < 1) {
+        role.link = "# No-member team";
         info(quotes(member.name) + " from " + quotes(role.teamName) + " is in a no-member team. Skipping.");
         continue;
       }
       
-      if (role.link != "") {
+      if (role.link.length > 0) {
         info(quotes(member.name) + " from " + quotes(role.teamName) + " already has a link. Skipping.");
         continue;
       }

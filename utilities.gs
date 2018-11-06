@@ -28,3 +28,16 @@ function quotes(str) {
 function cquotes(str) {
   return "「" + str + "」";
 }
+
+
+function _isTimeUp() {
+  var now = new Date();
+  return now.getTime() - _program_start_time.getTime() > 300000; // 5 minutes
+}
+
+
+function throwExceptionIfTimeIsAlmostUp() {
+  if (_isTimeUp) {
+    throw "Time is almost up. Exiting."
+  }
+}

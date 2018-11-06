@@ -1,12 +1,67 @@
 function sending_emails_main() {
   prepareConstants();
   
-  prepareDraft("1");
+  try { 
+    prepareDraftForAll();
+  } catch (err) {
+    warn(err);
+  }
+  
+  
 }
 
-function prepareDraft(member) {
+function sendEmailForAll() {
+  for (var iMember = 0; iMember < memberList.length; iMember++) {
+    throwExceptionIfTimeIsAlmostUp();
+    
+    var member = memberList[iMember];
+    sendEmailFor(member);
+  }
   
-  var links;
+}
+
+function sendEmailFor(member) {
+  // TODO: Create a "email sent" status?
+  // try if i can "blundle send" drafts in gmail, if so then don't need to do this
+  
+}
+
+function prepareDraftForAll() {
+  for (var iMember = 0; iMember < memberList.length; iMember++) {
+    throwExceptionIfTimeIsAlmostUp();
+    
+    var member = memberList[iMember];
+    prepareDraftFor(member);
+  }
+}
+  
+
+
+
+function deleteDraftFor(member) {
+  if (member.draftId != undefined && ! member.draftId.startsWith("#")) {
+    try {
+      GmailApp.getDraft(member.draftId).deleteDraft();
+    } catch (err) { warning(err); }
+    member.draftId = undefined;
+  }
+}
+
+
+function prepareDraftFor(member) {
+  var links = [];
+  
+  for (var iRole = 0; iRole < member.roles.length; iRole++) {
+    var link = member.roles[iRole].link;
+    
+    if (link != undefined && link != "" && link.startsWith("#"))
+      links.push(link);
+  }
+  
+  if (links.length == 0) {
+    member.draftId = "# No links were provided";
+    return;
+  } 
   
   var recipient = member.email;
   var subject = "多大中文" + CURRENT_DATE_CN + "绩效评分";
@@ -40,7 +95,7 @@ function prepareDraft(member) {
   
   
   var draft = GmailApp.createDraft(recipient, subject, body);
-  info(draft.getId());
+  member.draftId = draft.getId();
 }
 
 
