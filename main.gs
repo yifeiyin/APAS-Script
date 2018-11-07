@@ -1,100 +1,118 @@
 // super constants
 var APAS_WORKING_FOLDER_ID = "1odbTvpwksnSYvZ8RapMSXKVHJQh3TBkf";
+var DATA_FILE_ID = "1658uFfruumW3MsmZ4SoCMYUhP233cF5etNlzNK5hfY4";
 
+// See below for these three variables
+var memberList;
+var allTeamNames;
+var teamList;
+
+/*
+    ========== memberList ==========
+    An array of members. Each member has:
+    .name                // String       
+    .email               // String
+    .roles               // Array of object role
+    .draftId             // draft id of the email, this property could be undefined
+       role.position     // String, "Leader" or "Member"
+       role.teamName     // String
+       role.link         // String, the link to the google form
+
+    ========== allTeamNames ==========
+    An array of Strings. Each stores a "team name".
+
+    ========== teamList ==========
+    A dictionary:
+    keys:        String, teamName
+    values:      object team
+        team.leaders    // Array of String, leaders' names
+        team.members    // Array of String, members' names
+*/
 
 
 // // // // // // // // // // // // // // // // // // // // 
 
-var DEBUG_MODE = true;
 
 var CURRENT_MONTH = "OCT";
 var CURRENT_YEAR = "2018";
-
-
-// // // //
-
-
-var CURRENT_MODE = "";
-var CURRENT_DATE = "";
-
+var CURRENT_DATE;
+var CURRENT_MONTH_CN;
 var _program_start_time;
 
 function prepareConstants() {
   _program_start_time = new Date();
-  if (DEBUG_MODE) { CURRENT_MODE = "debug"; } else { CURRENT_MODE = "deployed"; }
   
   CURRENT_DATE = CURRENT_MONTH + CURRENT_YEAR;
   CURRENT_MONTH_CN = "十月";
 }
 
-// // // // // // // // // // // // // // // // // // // // 
-
-function openSpreadsheet(fileName) {
-  possibleFiles = DriveApp.getFolderById(APAS_WORKING_FOLDER_ID).getFilesByName(fileName);
-  if (possibleFiles.hasNext()) {
-    
-    // Disregarding the result since we will return resultFile (which is a Spreadsheet object). 
-    // This line is to "get the next file" and prepare for the assert statement which tests if there is another file with the same name.
-    possibleFiles.next()    
-    
-    resultFile = SpreadsheetApp.openById(DriveApp.getFolderById(APAS_WORKING_FOLDER_ID).getFilesByName(fileName).next().getId());
-    assert(!possibleFiles.hasNext(), "Found another file with the same name: " + String(fileName));       // make sure there isn't another file with the same name
-    return resultFile;
-  } else {
-    return undefined;
-  }
-}
-
-
-function findOrCreateSpreadsheet(fileName) {
-  var resultFile = openSpreadsheet(fileName);
-  if (resultFile != undefined) {
-    return resultFile;
-  }
-
-  // Did not find a existing file, creating a new one
-  possibleFiles = DriveApp.getFolderById(APAS_WORKING_FOLDER_ID).getFilesByName(fileName);
-  var spreadsheet = SpreadsheetApp.create(fileName);
-  var spreadsheetFile = DriveApp.getFileById(spreadsheet.getId());
-  DriveApp.getFolderById(APAS_WORKING_FOLDER_ID).addFile(spreadsheetFile);
-  DriveApp.getRootFolder().removeFile(spreadsheetFile);
-  resultFile = SpreadsheetApp.openById(DriveApp.getFolderById(APAS_WORKING_FOLDER_ID).getFilesByName(fileName).next().getId());
-  
-  return resultFile;
-}
-
-
-//function findOrCreateDestinationSpreadsheet() {
-//  const fileName = CURRENT_DATE + " - UTChinese APAS Raw Result"
-//  resultSs = findOrCreateSpreadsheet(fileName)
-//  info("func findOrCreateDestSs(): file: " + resultSs.getName())
-//  return resultSs
-//}
-
-
-// // // // // // // // // // // // // // // // // // // // 
-
-//function findAllGroups
-
-
-
-
-
-
-// // // // // // // // // // // // // // // // // // // // 
-
+var workingSpreadsheetName = "Testing, Member Info";
+var formFolderName = "forms";
+var destinationSpreadsheetName = "Destination Spreadsheet";
 
 function main() {
   prepareConstants()
-  info("Hi")
   
-  findOrCreateDestinationSpreadsheet()
-  
-  info("Bye")
+  main__send();
 }
 
 
-// // // // // // // // // // // // // // // // // // // // 
+function main__initialize() {
+  //
+  // First Run
+  //
+  loadMemberList("__original__");        // Loads member information from the original spreadsheet
+  validateMemberList();                  // validates member list, looking for invalid email addresses, team structures
+  saveMemberList(workingSpreadsheetName);    // Save memberlist to a new spreadsheet
+  
+}
+
+function main__forms() {
+  //
+  // Generating Forms
+  //
+  loadMemberList(workingSpreadsheetName);    // Loads memberlist from the spreadsheet it saved to
+  try { 
+    generateForms(formFolderName, destinationSpreadsheetName);
+  } catch (err) { 
+    warning(err); 
+    info("ANOTHER RUN IS NEEDED");
+  }
+  saveMemberList(workingSpreadsheetName);    
+  //storeMemberData();
+}
+  
+function main__emails() {
+  //
+  // Generating Emails
+  //
+  //restoreMemberData();
+  loadMemberList(workingSpreadsheetName);
+  try { 
+    generateDraftForAll();
+  } catch (err) { 
+    warning(err); 
+    info("ANOTHER RUN IS NEEDED");
+  }
+  //storeMemberData();
+  saveMemberList(workingSpreadsheetName);
+}
+
+function main__send() {
+  //
+  // Sending Emails
+  //
+  //restoreMemberData();
+  loadMemberList(workingSpreadsheetName);
+  try { 
+    sendEmailForAll();
+  } catch (err) { 
+    warning(err); 
+    info("ANOTHER RUN IS NEEDED");
+  }
+  //storeMemberData();
+  saveMemberList(workingSpreadsheetName);
+}
 
 
 

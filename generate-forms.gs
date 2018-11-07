@@ -4,15 +4,14 @@ function generate_forms_main_test() {
   //loadMemberList("__original__");
   loadMemberList("OCT2018 Forms-Generated Spreadsheet");
   
-  folderName = "Forms"
+  var folderName = "Forms"
   
-  destinationSsFileName = CURRENT_DATE + " Form Responses Destination Spreadsheet"
-  destinationSs = findOrCreateSpreadsheet(destinationSsFileName)
+  var destinationSsFileName = CURRENT_DATE + " Form Responses Destination Spreadsheet"
   
   try {
-    generateForms(folderName, destinationSs)
+    generateForms(folderName, destinationSsFileName);
   } catch (err) {
-    warning(err)
+    warning(err);
   }
   
   saveMemberList(CURRENT_DATE + " Forms-Generated Spreadsheet")
@@ -42,7 +41,8 @@ function createForm(folderName, formName) {
 
 
 
-function generateForms(folderName, destinationSsFile) {
+function generateForms(folderName, destinationSsFileName) {
+  var destinationSsFile = findOrCreateSpreadsheet(destinationSsFileName)
   
   for (var iMember = 0; iMember < memberList.length; iMember++) { // Change the value to memberList.length
     throwExceptionIfTimeIsAlmostUp();

@@ -12,30 +12,6 @@ var COL_NAME = 4;
 var COL_NROLES = 6;
 var COL_ROLEANDTEAMSTARTS = 7;
 
-// See below for these three variables
-var memberList;
-var allTeamNames;
-var teamList;
-
-/*
-    ========== memberList ==========
-    An array of members. Each member has:
-    .name                // String       
-    .email               // String
-    .roles               // Array of object role
-       role.position     // String, "Leader" or "Member"
-       role.teamName     // String
-
-    ========== allTeamNames ==========
-    An array of Strings. Each stores a "team name".
-
-    ========== teamList ==========
-    A dictionary:
-    keys:        String, teamName
-    values:      object team
-        team.leaders    // Array of String, leaders' names
-        team.members    // Array of String, members' names
-*/
 
 
 function load_and_save_main_test() {
@@ -50,12 +26,12 @@ function load_and_save_main_test() {
 //  saveMemberList(fileName);
 // 
   
-//  loadMemberList("OCT2018 Forms-Generated Spreadsheet");
-//  storeMemberData();
+  //loadMemberList("OCT2018 Forms-Generated Spreadsheet");
+  //storeMemberData();
   
-  restoreMemberData();
+//  restoreMemberData();
   
-  saveMemberList("test 4");
+//  saveMemberList("test 4");
 };
 
 
@@ -67,25 +43,51 @@ function load_and_save_main_test() {
 // Based on: https://stackoverflow.com/questions/34302070/how-can-i-store-and-retrieve-objects-from-google-apps-script-project-properties
 // TODO: Provide a method to export all data for backup purpose (maybe to a sperate json file)
 // TODO: Show the date of data restored
-function restoreMemberData() {
+function __restoreMemberData() {
   var memberListObj = PropertiesService.getScriptProperties().getProperty("memberList");
   memberList = JSON.parse(memberListObj);
   var allTeamNamesObj = PropertiesService.getScriptProperties().getProperty("allTeamNames");
   allTeamNames = JSON.parse(allTeamNamesObj);
   var teamListObj = PropertiesService.getScriptProperties().getProperty("teamList");
   teamList = JSON.parse(teamListObj);
-  info("Member data restored.")
-  return [memberListObj, allTeamNamesObj, teamListObj];
+  info("Member data restored.");
+  // return [memberListObj, allTeamNamesObj, teamListObj];
 }
-function storeMemberData() {
+
+function __storeMemberData() {
   PropertiesService.getScriptProperties()
   .setProperty("memberList", JSON.stringify(memberList))
   .setProperty("allTeamNames", JSON.stringify(allTeamNames))
   .setProperty("teamList", JSON.stringify(teamList));
-  info("Member data stored.")
-  return [memberListObj, allTeamNamesObj, teamListObj];
+  info("Member data stored.");
+  // return [memberListObj, allTeamNamesObj, teamListObj];
 }
 
+
+// Store data to or restore data from "DATA_FILE_ID"
+function restoreMemberData() {
+  var dataFile = DocumentApp.openById(DATA_FILE_ID);
+  var dataString = dataFile.getBody().getText();
+  var dataObject = JSON.parse(dataString);
+  
+  memberList = dataObject[0];
+  allTeamNames = dataObject[1];
+  teamList = dataObject[2];
+  
+  if (memberList && allTeamNames && teamList) {
+    info("Member data restored.");
+  } else {
+    warning("memberList might be empty: " + String(memberList.length));
+  }
+}
+
+function storeMemberData() {
+  var dataToStore = [memberList, allTeamNames, teamList];
+  var dataString = JSON.stringify(dataToStore);
+  var dataFile = DriveApp.getFileById(DATA_FILE_ID);
+  dataFile.setContent(dataString);
+  info("Member data stored.");
+}
 
 
 // ==================================
@@ -93,7 +95,7 @@ function storeMemberData() {
 // ==================================
 
 function loadMemberList(from) {
-  info("Loading " + quotes(from) + "...")
+  info("Loading " + quotes(from) + "...");
   
   if (from == "__original__") {
     loadMemberListFromOriginalSource();
@@ -129,23 +131,24 @@ function loadWorkingSpreadsheet(fileName) {
   //
   // [!] Notice: Code below are dupilicated from function loadMemberListFromOriginalSource()
   //
-  assert(dataRange != undefined, "cannot find the actual values range")
-  var mlssValues = dataRange.getValues()
+  assert(dataRange != undefined, "cannot find the actual values range");
+  var mlssValues = dataRange.getValues();
   mlssValues.shift(); // Removing the first row
   
   memberList = [];
   
   for (var r = 0; r < mlssValues.length; r++) {
     var member = {};
-    member.name = mlssValues[r][1];
     member.email = mlssValues[r][0];
+    member.name = mlssValues[r][1];
+    member.draftId = mlssValues[r][2] == ""? undefined : mlssValues[r][2];
     member.roles = [];
     
-    for (var i = 0; mlssValues[r][2 + i * 3]; i++) {
+    for (var i = 0; mlssValues[r][3 + i * 3]; i++) {
       var role = {};
-      role.position = mlssValues[r][2 + i * 3 + 0];
-      role.teamName = mlssValues[r][2 + i * 3 + 1];
-      role.link     = mlssValues[r][2 + i * 3 + 2] == undefined? "" : mlssValues[r][2 + i * 3 + 2];
+      role.position = mlssValues[r][3 + i * 3 + 0];
+      role.teamName = mlssValues[r][3 + i * 3 + 1];
+      role.link     = mlssValues[r][3 + i * 3 + 2] == undefined? "" : mlssValues[r][3 + i * 3 + 2];
       member.roles.push(role);
     }
     memberList.push(member);
@@ -170,6 +173,7 @@ function saveWorkingSpreadsheet(fileName) {
     
     rowContent.push(member.email);
     rowContent.push(member.name);
+    rowContent.push(member.draftId == undefined? "" : member.draftId);
     
     for (var iRole = 0; iRole < member.roles.length; iRole++) {
       rowContent.push(member.roles[iRole].position);
@@ -215,9 +219,17 @@ function printTeams() {
 function validateMemberList() {
   // Everyone should have a role
   for (var iMember = 0; iMember < memberList.length; iMember++) {
-      if (memberList[iMember].roles.length == 0) {
-        warning(quotes(memberList[iMember].name) + " has no roles.")
-      }
+    var member = memberList[iMember];
+    
+    if (member.roles.length == 0) {
+      // Everyone should have at least one role
+      info(quotes(member.name) + " has no roles.")
+    }
+    
+    emailRegex = /^([0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*@(([0-9a-zA-Z])+([-\w]*[0-9a-zA-Z])*\.)+[a-zA-Z]{2,9})$/;
+    if (!emailRegex.test(member.email)) {
+      error(member.name + " has a invalid email address: " + quotes(member.email));
+    }
   }
   
   // Every team should have only one leader and should have members
@@ -316,6 +328,40 @@ function loadMemberListFromOriginalSource() {
     }
     memberList.push(member)
   }
+}
+
+
+function openSpreadsheet(fileName) {
+  possibleFiles = DriveApp.getFolderById(APAS_WORKING_FOLDER_ID).getFilesByName(fileName);
+  if (possibleFiles.hasNext()) {
+    
+    // Disregarding the result since we will return resultFile (which is a Spreadsheet object). 
+    // This line is to "get the next file" and prepare for the assert statement which tests if there is another file with the same name.
+    possibleFiles.next()    
+    
+    resultFile = SpreadsheetApp.openById(DriveApp.getFolderById(APAS_WORKING_FOLDER_ID).getFilesByName(fileName).next().getId());
+    assert(!possibleFiles.hasNext(), "Found another file with the same name: " + String(fileName));       // make sure there isn't another file with the same name
+    return resultFile;
+  } else {
+    return undefined;
+  }
+}
+
+
+function findOrCreateSpreadsheet(fileName) {
+  var resultFile = openSpreadsheet(fileName);
+  if (resultFile != undefined) {
+    return resultFile;
+  }
+
+  // Did not find a existing file, creating a new one
+  possibleFiles = DriveApp.getFolderById(APAS_WORKING_FOLDER_ID).getFilesByName(fileName);
+  var spreadsheet = SpreadsheetApp.create(fileName);
+  var spreadsheetFile = DriveApp.getFileById(spreadsheet.getId());
+  DriveApp.getFolderById(APAS_WORKING_FOLDER_ID).addFile(spreadsheetFile);
+  DriveApp.getRootFolder().removeFile(spreadsheetFile);
+  resultFile = SpreadsheetApp.openById(DriveApp.getFolderById(APAS_WORKING_FOLDER_ID).getFilesByName(fileName).next().getId());
   
+  return resultFile;
 }
 
