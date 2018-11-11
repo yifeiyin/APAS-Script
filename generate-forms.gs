@@ -98,17 +98,17 @@ function generateForms(folderName, destinationSsFileName) {
           .setAcceptingResponses(true)
           .setDestination(FormApp.DestinationType.SPREADSHEET, destinationSsFile.getId()); // this might not be necessary
       
-      publishedUrl = form.shortenFormUrl(form.getPublishedUrl())
-      role.link = publishedUrl
-      
+      publishedUrl = form.shortenFormUrl(form.getPublishedUrl());
+      role.link = publishedUrl;
+      role.formId = form.getId();
       
       if (role.position == "Leader") {
-        _generateFormContentForLeader(form, member, role)
+        _generateFormContentForLeader(form, member, role);
         
       } else if (role.position == "Member") {
-        _generateFormContentForMember(form, member, role)
+        _generateFormContentForMember(form, member, role);
         
-      } else { error("Unexpected position value: " + String(role.position)) }
+      } else { error("Unexpected position value: " + String(role.position)); }
     }
   }
 }
@@ -127,13 +127,13 @@ function _generateFormContentForLeader(form, member, role) {
       var column_texts = ["N/A", "F", "C", "B-", "B", "B+", "A-", "A"];
       
       var gridItem = form.addGridItem();
-      var gridValidation = FormApp.createGridValidation().requireLimitOneResponsePerColumn().build();
+      // var gridValidation = FormApp.createGridValidation().requireLimitOneResponsePerColumn().build();
       
       gridItem
       .setRequired(true)
       .setTitle(memberName)
-      .setHelpText("给" + role.teamName + "的成员" + cquotes(memberName) + "打分")
-      .setValidation(gridValidation);
+      .setHelpText("给" + role.teamName + "的成员" + cquotes(memberName) + "打分");
+      // .setValidation(gridValidation);
       
       gridItem
       .setColumns(column_texts)
@@ -177,7 +177,7 @@ function _generateFormContentForMember(form, member, role) {
     var row_texts = ["关怀度", "执行力", "计划性", "沟通力", "项目完成满意度"]
     var column_texts = ["N/A", "F", "C", "B-", "B", "B+", "A-", "A"]
     
-    var gridItem = form.addGridItem()
+    var gridItem = form.addGridItem();
     // var gridValidation = FormApp.createGridValidation().requireLimitOneResponsePerColumn().build() // One respones per COLUMN, should not be used here
     
     gridItem

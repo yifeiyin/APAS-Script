@@ -50,17 +50,19 @@ var workingSpreadsheetName = "Testing, Member Info";
 var formFolderName = "forms";
 var destinationSpreadsheetName = "Destination Spreadsheet";
 
-function main() {
-  prepareConstants()
-  
-  main__send();
-}
+//function main() {
+//  prepareConstants();
+//  
+//  main__initialize();
+//}
 
 
 function main__initialize() {
   //
   // First Run
   //
+  prepareConstants();
+  
   loadMemberList("__original__");        // Loads member information from the original spreadsheet
   validateMemberList();                  // validates member list, looking for invalid email addresses, team structures
   saveMemberList(workingSpreadsheetName);    // Save memberlist to a new spreadsheet
@@ -71,6 +73,8 @@ function main__forms() {
   //
   // Generating Forms
   //
+  prepareConstants();
+  
   loadMemberList(workingSpreadsheetName);    // Loads memberlist from the spreadsheet it saved to
   try { 
     generateForms(formFolderName, destinationSpreadsheetName);
@@ -87,6 +91,8 @@ function main__emails() {
   // Generating Emails
   //
   //restoreMemberData();
+  prepareConstants();
+  
   loadMemberList(workingSpreadsheetName);
   try { 
     generateDraftForAll();
@@ -103,6 +109,8 @@ function main__send() {
   // Sending Emails
   //
   //restoreMemberData();
+  prepareConstants();
+  
   loadMemberList(workingSpreadsheetName);
   try { 
     sendEmailForAll();

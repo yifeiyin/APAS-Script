@@ -108,8 +108,8 @@ function loadMemberList(from) {
   FindAllTeamNames();
   InitializeTeams();
   
-  info( String(memberList.length) + " members loaded from file " + quotes(from) + "and, " )
-  info( String(allTeamNames.length) + " teams were found.")
+  info( String(memberList.length) + " members loaded from file " + quotes(from) + "and, " + 
+    String(allTeamNames.length) + " teams were found.")
 }
 
 function saveMemberList(fileName) {
@@ -144,11 +144,12 @@ function loadWorkingSpreadsheet(fileName) {
     member.draftId = mlssValues[r][2] == ""? undefined : mlssValues[r][2];
     member.roles = [];
     
-    for (var i = 0; mlssValues[r][3 + i * 3]; i++) {
+    for (var i = 0; mlssValues[r][3 + i * 4]; i++) {
       var role = {};
-      role.position = mlssValues[r][3 + i * 3 + 0];
-      role.teamName = mlssValues[r][3 + i * 3 + 1];
-      role.link     = mlssValues[r][3 + i * 3 + 2] == undefined? "" : mlssValues[r][3 + i * 3 + 2];
+      role.position = mlssValues[r][3 + i * 4 + 0];
+      role.teamName = mlssValues[r][3 + i * 4 + 1];
+      role.link     = mlssValues[r][3 + i * 4 + 2] == undefined? "" : mlssValues[r][3 + i * 4 + 2];
+      role.formId   = mlssValues[r][3 + i * 4 + 3] == undefined? "" : mlssValues[r][3 + i * 4 + 3];
       member.roles.push(role);
     }
     memberList.push(member);
@@ -160,7 +161,7 @@ function saveWorkingSpreadsheet(fileName) {
   var outputSs = findOrCreateSpreadsheet(fileName);
   
   var outputSheet = outputSs.getSheets()[0];
-  outputSheet.clearContents()
+  outputSheet.clearContents();
   
   var _date = new Date();
   var _timeInfo = _date.toLocaleTimeString();
@@ -179,6 +180,7 @@ function saveWorkingSpreadsheet(fileName) {
       rowContent.push(member.roles[iRole].position);
       rowContent.push(member.roles[iRole].teamName);
       rowContent.push(member.roles[iRole].link);
+      rowContent.push(member.roles[iRole].formId);
     }
     
     outputSheet.appendRow(rowContent);
