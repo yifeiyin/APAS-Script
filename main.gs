@@ -39,11 +39,20 @@ var CURRENT_DATE;
 var CURRENT_MONTH_CN;
 var _program_start_time;
 
+var evaluationAspectsForMembers;
+var evaluationAspectsForLeaders;
+var evaluationRatings;
+
 function prepareConstants() {
   _program_start_time = new Date();
   
   CURRENT_DATE = CURRENT_MONTH + CURRENT_YEAR;
   CURRENT_MONTH_CN = "十月";
+  
+  evaluationAspectsForMembers = ["完成度", "关怀度", "执行力", "计划性", "沟通力"];
+  evaluationAspectsForLeaders = ["关怀度", "执行力", "计划性", "沟通力", "项目完成满意度"];
+  evaluationRatings = ["N/A", "F", "C", "B-", "B", "B+", "A-", "A"];
+  
 }
 
 var workingSpreadsheetName = "Testing, Member Info";

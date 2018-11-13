@@ -17,23 +17,23 @@ function info(msg) {
 }
 
 function debug(msg) {
-  _log("DEBUG", msg);
+  _log("debug", msg);
   Logger.log("DEBUG: \t\t" + msg);
 }
 
 function error(msg) {
-  _log("--ERROR--", msg);
+  _log("error", msg);
   Logger.log("ERROR: \t\t" + msg);
 }
 
 function warning(msg) {
-  _log("WARNING: \t" + msg);
+  _log("warning", msg);
+  Logger.log("WARNING: \t\t" + msg);
 }
 
 function assert(exp, msg) {
   if (!exp) {
-    error(msg);
-    var x = 1 / 0;
+    error("Assertion Failed: " + msg);
   }
 }
 

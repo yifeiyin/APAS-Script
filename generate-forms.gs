@@ -113,7 +113,11 @@ function generateForms(folderName, destinationSsFileName) {
   }
 }
 
-
+/* These variables are already initialized in prepareConstants.
+var evaluationAspectsForMembers = ["完成度", "关怀度", "执行力", "计划性", "沟通力"];
+var evaluationAspectsForLeaders = ["关怀度", "执行力", "计划性", "沟通力", "项目完成满意度"];
+var evaluationRatings = ["N/A", "F", "C", "B-", "B", "B+", "A-", "A"];
+*/
 
 function _generateFormContentForLeader(form, member, role) {
   var teamMemberNames = teamList[role.teamName].members;
@@ -123,8 +127,8 @@ function _generateFormContentForLeader(form, member, role) {
     for (var memberi = 0; memberi < teamMemberNames.length; memberi++) {
       var memberName = teamMemberNames[memberi];
       
-      var row_texts = ["完成度", "关怀度", "执行力", "计划性", "沟通力"];
-      var column_texts = ["N/A", "F", "C", "B-", "B", "B+", "A-", "A"];
+      var row_texts = evaluationAspectsForMembers;
+      var column_texts = evaluationRatings;
       
       var gridItem = form.addGridItem();
       // var gridValidation = FormApp.createGridValidation().requireLimitOneResponsePerColumn().build();
@@ -172,10 +176,10 @@ function _generateFormContentForMember(form, member, role) {
   
   // Section 1: Rate for the leader (5 categories)
   {
-    var leaderName = teamLeaders[0]
+    var leaderName = teamLeaders[0];
     
-    var row_texts = ["关怀度", "执行力", "计划性", "沟通力", "项目完成满意度"]
-    var column_texts = ["N/A", "F", "C", "B-", "B", "B+", "A-", "A"]
+    var row_texts = evaluationAspectsForLeaders;
+    var column_texts = evaluationAspectsForLeaders;
     
     var gridItem = form.addGridItem();
     // var gridValidation = FormApp.createGridValidation().requireLimitOneResponsePerColumn().build() // One respones per COLUMN, should not be used here
