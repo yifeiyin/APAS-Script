@@ -108,7 +108,7 @@ function loadMemberList(from) {
   FindAllTeamNames();
   InitializeTeams();
   
-  info( String(memberList.length) + " members loaded from file " + quotes(from) + "and, " + 
+  info( String(memberList.length) + " members loaded from file " + quotes(from) + ", " + 
     String(allTeamNames.length) + " teams were found.")
 }
 
@@ -123,7 +123,7 @@ function saveMemberList(fileName) {
 // ==================================
 
 function loadWorkingSpreadsheet(fileName) {
-  var ss = openSpreadsheet(fileName)
+  var ss = openSpreadsheet(fileName);
   var sheet = ss.getSheets()[0];
   
   var dataRange = sheet.getDataRange();
@@ -334,14 +334,14 @@ function loadMemberListFromOriginalSource() {
 
 
 function openSpreadsheet(fileName) {
-  possibleFiles = DriveApp.getFolderById(APAS_WORKING_FOLDER_ID).getFilesByName(fileName);
+  var possibleFiles = DriveApp.getFolderById(APAS_WORKING_FOLDER_ID).getFilesByName(fileName);
   if (possibleFiles.hasNext()) {
     
     // Disregarding the result since we will return resultFile (which is a Spreadsheet object). 
     // This line is to "get the next file" and prepare for the assert statement which tests if there is another file with the same name.
-    possibleFiles.next()    
+    possibleFiles.next();    
     
-    resultFile = SpreadsheetApp.openById(DriveApp.getFolderById(APAS_WORKING_FOLDER_ID).getFilesByName(fileName).next().getId());
+    var resultFile = SpreadsheetApp.openById(DriveApp.getFolderById(APAS_WORKING_FOLDER_ID).getFilesByName(fileName).next().getId());
     assert(!possibleFiles.hasNext(), "Found another file with the same name: " + String(fileName));       // make sure there isn't another file with the same name
     return resultFile;
   } else {
@@ -357,7 +357,7 @@ function findOrCreateSpreadsheet(fileName) {
   }
 
   // Did not find a existing file, creating a new one
-  possibleFiles = DriveApp.getFolderById(APAS_WORKING_FOLDER_ID).getFilesByName(fileName);
+  var possibleFiles = DriveApp.getFolderById(APAS_WORKING_FOLDER_ID).getFilesByName(fileName);
   var spreadsheet = SpreadsheetApp.create(fileName);
   var spreadsheetFile = DriveApp.getFileById(spreadsheet.getId());
   DriveApp.getFolderById(APAS_WORKING_FOLDER_ID).addFile(spreadsheetFile);
