@@ -32,27 +32,22 @@ function warning(msg) {
 }
 
 function assert(exp, msg) {
-  if (!exp) {
+  if (!exp)
     error("Assertion Failed: " + msg);
-  }
 }
 
-function quotes(str) {
-  return '"' + str + '"';
-}
-
-function cquotes(str) {
-  return "「" + str + "」";
-}
-
-function startsWithHash(str) {
-  return str.indexOf("#") == 0;
-}
+function quotes(str) { return '"' + str + '"'; }
+function cquotes(str) { return "「" + str + "」"; }
+function startsWithHash(str) { return str.indexOf("#") == 0; }
+function getProperty(key) { return PropertiesService.getScriptProperties().getProperty(key); }
+function setProperty(key, value) { return PropertiesService.getScriptProperties().setProperty(key, value); }
 
 
 function _isTimeAlmostUp() {
   var now = new Date();
-  return now.getTime() - _program_start_time.getTime() > 300000; // 5 minutes
+  var FIVE_MINS = 300000;
+  var DEBUG_USE = 20 * 1000;
+  return now.getTime() - _program_start_time.getTime() > DEBUG_USE; // 5 minutes
 }
 
 

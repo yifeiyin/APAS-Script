@@ -15,53 +15,44 @@ var COL_ROLEANDTEAMSTARTS = 7;
 
 
 function load_and_save_main_test() {
-  prepareConstants();
-  
-  //var fileName = CURRENT_DATE + " Working Spreadsheet";
 
-//  loadMemberList("__original__");
-//  validateMemberList();
-//  printTeams();
-  
-//  saveMemberList(fileName);
-// 
-  
-  //loadMemberList("OCT2018 Forms-Generated Spreadsheet");
-  //storeMemberData();
-  
-//  restoreMemberData();
-  
-//  saveMemberList("test 4");
 };
 
 
-
-// ==================================
-// MARK: Store and Restore Member Data (using PropertiesService)
-// ==================================
-
-// Based on: https://stackoverflow.com/questions/34302070/how-can-i-store-and-retrieve-objects-from-google-apps-script-project-properties
-// TODO: Provide a method to export all data for backup purpose (maybe to a sperate json file)
-// TODO: Show the date of data restored
-function __restoreMemberData() {
-  var memberListObj = PropertiesService.getScriptProperties().getProperty("memberList");
-  memberList = JSON.parse(memberListObj);
-  var allTeamNamesObj = PropertiesService.getScriptProperties().getProperty("allTeamNames");
-  allTeamNames = JSON.parse(allTeamNamesObj);
-  var teamListObj = PropertiesService.getScriptProperties().getProperty("teamList");
-  teamList = JSON.parse(teamListObj);
-  info("Member data restored.");
-  // return [memberListObj, allTeamNamesObj, teamListObj];
+function mGenerateMemberlist(memberlistName) {
+  prepareConstants();
+  loadMemberList("__original__");        // Loads member information from the original spreadsheet
+  validateMemberList();                  // validates member list, looking for invalid email addresses, team structures
+  saveMemberList(memberlistName);    // Save memberlist to a new spreadsheet
 }
 
-function __storeMemberData() {
-  PropertiesService.getScriptProperties()
-  .setProperty("memberList", JSON.stringify(memberList))
-  .setProperty("allTeamNames", JSON.stringify(allTeamNames))
-  .setProperty("teamList", JSON.stringify(teamList));
-  info("Member data stored.");
-  // return [memberListObj, allTeamNamesObj, teamListObj];
-}
+
+//// ==================================
+//// MARK: Store and Restore Member Data (using PropertiesService)
+//// ==================================
+//
+//// Based on: https://stackoverflow.com/questions/34302070/how-can-i-store-and-retrieve-objects-from-google-apps-script-project-properties
+//// TODO: Provide a method to export all data for backup purpose (maybe to a sperate json file)
+//// TODO: Show the date of data restored
+//function __restoreMemberData() {
+//  var memberListObj = PropertiesService.getScriptProperties().getProperty("memberList");
+//  memberList = JSON.parse(memberListObj);
+//  var allTeamNamesObj = PropertiesService.getScriptProperties().getProperty("allTeamNames");
+//  allTeamNames = JSON.parse(allTeamNamesObj);
+//  var teamListObj = PropertiesService.getScriptProperties().getProperty("teamList");
+//  teamList = JSON.parse(teamListObj);
+//  info("Member data restored.");
+//  // return [memberListObj, allTeamNamesObj, teamListObj];
+//}
+//
+//function __storeMemberData() {
+//  PropertiesService.getScriptProperties()
+//  .setProperty("memberList", JSON.stringify(memberList))
+//  .setProperty("allTeamNames", JSON.stringify(allTeamNames))
+//  .setProperty("teamList", JSON.stringify(teamList));
+//  info("Member data stored.");
+//  // return [memberListObj, allTeamNamesObj, teamListObj];
+//}
 
 
 // Store data to or restore data from "DATA_FILE_ID"

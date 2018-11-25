@@ -1,27 +1,36 @@
 function sending_emails_main() {
+}
 
+
+function mGenerateEmails(memberlistName) {
   prepareConstants();
-  
-  restoreMemberData();
-  validateMemberList();
-  return;
-  
+  loadMemberList(memberlistName);
   try { 
     generateDraftForAll();
-  } catch (err) {
-    warning(err);
+  } catch (err) { 
+    warning(err); 
+    info("ANOTHER RUN IS NEEDED");
   }
-  info("Program is about to exit.")
-  
-  
-  storeMemberData();
+  saveMemberList(memberlistName);
+  info("Exiting mGenerateEmails");
+}
+
+
+function mSendEmails(memberlistName) {
+  prepareConstants();
+  loadMemberList(memberlistName);
+  try { 
+    sendEmailForAll();
+  } catch (err) { 
+    warning(err); 
+    info("ANOTHER RUN IS NEEDED");
+  }
+  //storeMemberData();
+  saveMemberList(memberlistName);
 }
 
 
 function sendEmailForAll() {
-//  info("!! Comment this message out to send actual emails");
-//  return;
-  
   for (var iMember = 0; iMember < memberList.length; iMember++) {
     throwExceptionIfTimeIsAlmostUp();
     // if (iMember > memberList.length / 2) { throw "test time out"; } // Testing time out
@@ -33,7 +42,6 @@ function sendEmailForAll() {
     }
   }
 }
-
 
 
 function sendEmailFor(member) {
@@ -50,8 +58,6 @@ function sendEmailFor(member) {
   return true;
 }
 
-
-
 function generateDraftForAll() {
   for (var iMember = 0; iMember < memberList.length; iMember++) {
     throwExceptionIfTimeIsAlmostUp();
@@ -60,9 +66,6 @@ function generateDraftForAll() {
     generateDraftFor(member);
   }
 }
-  
-
-
 
 function deleteDraftFor(member) {
   if (member.draftId != undefined && ! startsWithHash(member.draftId)) {
@@ -87,7 +90,6 @@ function generateDraftFor(member) {
     }
   }
 
-  
   if (links.length == 0) {
     member.draftId = "# No links were provided";
     return;
@@ -100,8 +102,7 @@ function generateDraftFor(member) {
   // TODO: Tell them the estimated time
   // TODO: Add a logo?
   
-  body += member.name + "：\n";
-  body += "\n";
+  body += member.name + "：\n\n";
   body += "请点击以下链接给你的小伙伴们打分";
   
   if (links.length == 1)
@@ -111,17 +112,13 @@ function generateDraftFor(member) {
   
   
   body += "\n";
-
   for (var iLink = 0; iLink < links.length; iLink++)
     body += links[iLink] + "\n\n";
-  
-  
   
   body += "\n";
   body += "如果遇到任何技术问题，请在钉钉上联系 Yifei。\n";
   body += "\n";
   body += "多大中文";
-  
   
   var draft = GmailApp.createDraft(recipient, subject, body);
   member.draftId = draft.getId();

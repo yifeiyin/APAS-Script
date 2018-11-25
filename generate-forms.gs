@@ -1,21 +1,21 @@
 function generate_forms_main_test() {
-  prepareConstants()
-  
-  //loadMemberList("__original__");
-  loadMemberList("OCT2018 Forms-Generated Spreadsheet");
-  
-  var folderName = "Forms"
-  
-  var destinationSsFileName = CURRENT_DATE + " Form Responses Destination Spreadsheet"
-  
-  try {
-    generateForms(folderName, destinationSsFileName);
-  } catch (err) {
-    warning(err);
-  }
-  
-  saveMemberList(CURRENT_DATE + " Forms-Generated Spreadsheet")
+
 }
+
+
+function mGenerateForms(memberlistName, formFolderName, destinationSpreadsheetName) {
+  prepareConstants();
+  loadMemberList(memberlistName);    // Loads memberlist from the spreadsheet it saved to
+  try { 
+    generateForms(formFolderName, destinationSpreadsheetName);
+  } catch (err) { 
+    warning(err); 
+    info("ANOTHER RUN IS NEEDED");
+  }
+  saveMemberList(memberlistName);    
+  info("Exiting mGenerateForms");
+}
+
 
 
 function createForm(folderName, formName) {
@@ -44,8 +44,8 @@ function createForm(folderName, formName) {
 function generateForms(folderName, destinationSsFileName) {
   var destinationSsFile = findOrCreateSpreadsheet(destinationSsFileName)
   
-  for (var iMember = 0; iMember < memberList.length; iMember++) { // Change the value to memberList.length
-    throwExceptionIfTimeIsAlmostUp();
+  for (var iMember = 0; iMember < memberList.length; iMember++) {
+    throwExceptionIfTimeIsAlmostUp(); // TODO: Change  
     
     var member = memberList[iMember];
 
@@ -77,6 +77,8 @@ function generateForms(folderName, destinationSsFileName) {
         continue;
       }
       
+      info("Generating form for " + quotes(member.name) + " from " + quotes(role.teamName) + "...");
+      
       var formFileName = CURRENT_DATE + " " + member.name;
       var possibleSuffix = member.roles.length > 1 ? " (" + role.teamName + ")" : "";
 
@@ -84,7 +86,7 @@ function generateForms(folderName, destinationSsFileName) {
       var formDescription = 
         "此问卷是程序自动为「" + member.name + "」生成的，发送到 " + member.email + "。\n" + 
           "如果你不是该人，请不要填写。\n\n" + 
-            "如果名字、团队信息出现错误，请告知 Yvonne。\n" + 
+            "如果名字、团队信息出现错误，请告知 Sandy。\n" + 
               "如果想更改被显示的名字，" + 
                 "或者有任何其他问题、意见或建议，可直接在钉钉上联系 Yifei。😜";
       var formConfirmationMessage = "谢谢使用。";
@@ -113,7 +115,7 @@ function generateForms(folderName, destinationSsFileName) {
   }
 }
 
-/* These variables are already initialized in prepareConstants.
+/* NOTE THAT: These variables are already initialized in prepareConstants.
 var evaluationAspectsForMembers = ["完成度", "关怀度", "执行力", "计划性", "沟通力"];
 var evaluationAspectsForLeaders = ["关怀度", "执行力", "计划性", "沟通力", "项目完成满意度"];
 var evaluationRatings = ["N/A", "F", "C", "B-", "B", "B+", "A-", "A"];
@@ -131,7 +133,6 @@ function _generateFormContentForLeader(form, member, role) {
       var column_texts = evaluationRatings;
       
       var gridItem = form.addGridItem();
-      // var gridValidation = FormApp.createGridValidation().requireLimitOneResponsePerColumn().build();
       
       gridItem
       .setRequired(true)
@@ -179,10 +180,9 @@ function _generateFormContentForMember(form, member, role) {
     var leaderName = teamLeaders[0];
     
     var row_texts = evaluationAspectsForLeaders;
-    var column_texts = evaluationAspectsForLeaders;
+    var column_texts = evaluationRatings;
     
     var gridItem = form.addGridItem();
-    // var gridValidation = FormApp.createGridValidation().requireLimitOneResponsePerColumn().build() // One respones per COLUMN, should not be used here
     
     gridItem
     .setRequired(true)

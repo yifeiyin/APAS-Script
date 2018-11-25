@@ -55,81 +55,40 @@ function prepareConstants() {
   
 }
 
-var workingSpreadsheetName = "Testing, Member Info";
+var memberlistName = "Testing, Member Info";
 var formFolderName = "forms";
 var destinationSpreadsheetName = "Destination Spreadsheet";
+var evaluationEntriesName = "Evaluation Entries";
 
-//function main() {
-//  prepareConstants();
-//  
-//  main__initialize();
-//}
+// Functions to call:
+/*
+mGenerateMemberlist(memberlistName);
+mGenerateForms(memberlistName, formFolderName, destinationSpreadsheetName);
+mGenerateEmails(memberlistName);
+mSendEmails(memberlistName);
+mCollectResults(memberlistName, evaluationEntriesName);
+
+*/
+
+// TODO: Add functions for "resetting" things, such as reset email draft, reset and delete email draft, reset forms, etc
+// TODO: Change the way pausing the program
 
 
-function main__initialize() {
-  //
-  // First Run
-  //
-  prepareConstants();
-  
-  loadMemberList("__original__");        // Loads member information from the original spreadsheet
-  validateMemberList();                  // validates member list, looking for invalid email addresses, team structures
-  saveMemberList(workingSpreadsheetName);    // Save memberlist to a new spreadsheet
-  
-}
-
-function main__forms() {
-  //
-  // Generating Forms
-  //
-  prepareConstants();
-  
-  loadMemberList(workingSpreadsheetName);    // Loads memberlist from the spreadsheet it saved to
-  try { 
-    generateForms(formFolderName, destinationSpreadsheetName);
-  } catch (err) { 
-    warning(err); 
-    info("ANOTHER RUN IS NEEDED");
-  }
-  saveMemberList(workingSpreadsheetName);    
-  //storeMemberData();
-}
-  
-function main__emails() {
-  //
-  // Generating Emails
-  //
-  //restoreMemberData();
-  prepareConstants();
-  
-  loadMemberList(workingSpreadsheetName);
-  try { 
-    generateDraftForAll();
-  } catch (err) { 
-    warning(err); 
-    info("ANOTHER RUN IS NEEDED");
-  }
-  //storeMemberData();
-  saveMemberList(workingSpreadsheetName);
-}
-
-function main__send() {
-  //
-  // Sending Emails
-  //
-  //restoreMemberData();
-  prepareConstants();
-  
-  loadMemberList(workingSpreadsheetName);
-  try { 
-    sendEmailForAll();
-  } catch (err) { 
-    warning(err); 
-    info("ANOTHER RUN IS NEEDED");
-  }
-  //storeMemberData();
-  saveMemberList(workingSpreadsheetName);
-}
+function selector_0_GenerateMemberlist() { mGenerateMemberlist(memberlistName);                                                  }
+function selector_1_GenerateForms()      { mGenerateForms(memberlistName, formFolderName, destinationSpreadsheetName);           }
+function selector_2_GenerateEmails()     { mGenerateEmails(memberlistName);                                                      }
+function selector_3_SendEmails()         { mSendEmails(memberlistName);                                                          }
+function selector_4_CollectResults()     { mCollectResults(memberlistName, evaluationEntriesName);                               }
 
 
 
+
+
+
+
+
+
+
+
+
+//

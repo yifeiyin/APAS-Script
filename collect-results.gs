@@ -1,23 +1,4 @@
 function collect_result_main_test() {
-  /*prepareConstants();
-  loadMemberList(workingSpreadsheetName);
-  collectResults();
-  
-  for (var i = 0; i < evaluationEntries.length; i++) {
-    debug("");
-    for (p in evaluationEntries[i]) {
-      debug(String(p) + ": " + JSON.stringify(evaluationEntries[i][p]));
-    }
-  }
-  saveEvaluationEntries(fileName);
-  */
-  
-  var fileName = "Evaluation Entries";
-  loadEvaluationEntries(fileName);
-  saveEvaluationEntries("evaluation entries 2");
-
-  
-  info("Script is about to be terminated.");
 }
 
 var evaluationEntries = [];
@@ -28,14 +9,31 @@ var LEADER_E_MEMBER = "Leader Evaluates Member";
 var YES = "Yes";
 var NO = "No";
 
-function collectResults() {
-  generateEvaluationEntries();
-  
-  //assert(resultStats.totalFormsCount - resultStats.noResponseCount == evaluationEntries.length, "Responses collected should equal to evaluation entries length");
-  
 
-
+function mCollectResults(memberlistName, evaluationEntriesName) {
+  prepareConstants();
+  loadMemberList(memberlistName);
+  
+  if (getProperty("collect-results.generateEvaluationEntries.nextIMemberValue") != "undefined") {
+    loadEvaluationEntries(evaluationEntriesName);
+  } else {
+    info("collectResults: Starting fresh");
+  }
+  try {
+    generateEvaluationEntries();
+  } catch (err) { warning(err); }
+  
+  saveEvaluationEntries(evaluationEntriesName);
+  
+  if (getProperty("collect-results.generateEvaluationEntries.nextIMemberValue") != "undefined") {
+    warning("ANOTHER RUN IS NEEDED");
+  }
 }
+
+
+// ==================================
+// MARK: Save/load Evaluation Entries
+// ==================================
 
 function saveEvaluationEntries(fileName) {
   assert(evaluationEntries.length > 0, "evaluationEntries is empty!");
@@ -54,26 +52,36 @@ function saveEvaluationEntries(fileName) {
       rowToAppend.push(JSON.stringify(evaluationEntries[i][properties[j]]));
     sheet.appendRow(rowToAppend);
   }
+  info("Evaluation entires saved to " + quotes(fileName));
 }
 
+
 function loadEvaluationEntries(fileName) {
+  try {
   var sheet = openSpreadsheet(fileName).getSheets()[0];
-  var values = sheet.getDataRange().getDisplayValues();
+  } catch (err) {
+    warning(err + " Did not load evaluation entries: " + quotes(fileName) + " not found")
+    return
+  }
   
+  var values = sheet.getDataRange().getDisplayValues();
   var properties = [];
   for (var col = 0; col < values[0].length; col++) 
     properties.push(values[0][col]);
   
   for (var row = 1; row < values.length; row++) {
     var evaluationEntry = {};
-    
     for (var col = 0; col < properties.length; col++)
       evaluationEntry[properties[col]] = JSON.parse(values[row][col]);
-    
     evaluationEntries.push(evaluationEntry);
   }
+  info("Evaluation entries loaded from " + quotes(fileName))
 }
 
+
+// ==================================
+// MARK: Generate Evaluation Entries
+// ==================================
 
 function generateEvaluationEntries() {
   
@@ -101,19 +109,22 @@ function generateEvaluationEntries() {
   
   for (var iMember = 0; iMember < memberList.length; iMember++) {
     // Check for if the program is in recover mode (which is indicated by a not-undefined value in that property)
-    if (PropertiesService.getScriptProperties().getProperty("collect-results.generateEvaluationEntries.nextIMemberValue") != undefined) {
-      iMember = PropertiesService.getScriptProperties().getProperty("collect-results.generateEvaluationEntries.nextIMemberValue");
-      PropertiesService.getScriptProperties().setProperty("collect-results.generateEvaluationEntries.nextIMemberValue", undefined);
+    if (getProperty("collect-results.generateEvaluationEntries.nextIMemberValue") != "undefined") {
+      iMember = parseInt(getProperty("collect-results.generateEvaluationEntries.nextIMemberValue"));
+      setProperty("collect-results.generateEvaluationEntries.nextIMemberValue", "undefined");
+      info("generateEvaluationEntries: Continuing from where left off: " + String(iMember));
     }
     // If time is almost up, set the property to a not-undefined value.
     if (_isTimeAlmostUp()) {
-      var nextIMemberValue = iMember;
-      PropertiesService.getScriptProperties().setProperty("collect-results.generateEvaluationEntries.nextIMemberValue", nextIMemberValue);
+      var nextIMemberValue = String(iMember);
+      setProperty("collect-results.generateEvaluationEntries.nextIMemberValue", nextIMemberValue);
+      info("generateEvaluationEntries: Saving next value to property: " + String(nextIMemberValue));
       throw "Time is almost up.";
     }
+    // TODO: Put the chunk above into a function so that it can be reused
     
     var member = memberList[iMember];
-    
+
     for (var iRole = 0; iRole < member.roles.length; iRole++) {
       var role = member.roles[iRole];
       var link = role.link;
@@ -152,15 +163,6 @@ function generateEvaluationEntries() {
 }
 
 
-/***** NOTES 3 Pseudo Code For the hasBonus Section *******
-* Declare bonuses As Dictionary.
-* for currentMemberName in memberNamesOfThisTeam:
-*     if hasBonusSection and currentMemberName is in bonusSectionResponse:
-*        bonuses[currentMemberName] = YES.
-*     else:
-*        bonuses[currentMemberName] = NO.
-***********************************************************/
-
 function _generateEvaluationEntryForLeader(member, role, itemResponses, teamName, evaluatedBy, timestamp) {
   // We expect that the leader will rate for each of its members.
   // Refer _generateFormContentForMember in generate-forms.gs for the structure of the form
@@ -171,24 +173,23 @@ function _generateEvaluationEntryForLeader(member, role, itemResponses, teamName
   if (hasBonusSection) { bonusSectionResponse = itemResponses[itemResponses.length - 2]; }
   
   var bonuses = {};
-  
   for (var i = 0; i < teamList[teamName].members.length; i++) {
-    // See NOTES 3 (before this chunk of code) for explanations
+    // Initializing "bonuses" so that each member in the list has either YES or NO. 
+    // It will be used when generating entries for each member.
     var currentMemberName = teamList[teamName].members[i];
-    var hasBonus = NO;
-    if (hasBonusSection) {
-      for (var iItem = 0; iItem < bonusSectionResponse.getResponse().length; iItem++)
-        if (currentMemberName == bonusSectionResponse[iItem])
-          hasBonus = YES;
+
+    if (hasBonusSection && bonusSectionResponse.getResponse().indexOf(currentMemberName) >= 0) {
+      bonuses[currentMemberName] = YES;
+    } else {
+      bonuses[currentMemberName] = NO;
     }
-    bonuses[currentMemberName] = hasBonus;
   }
   
-  var _iMax = itemResponses.length - 1;
-  if (hasBonus) { _iMax--; }
+  var numberOfEvaluationSections = itemResponses.length - 1;
+  if (hasBonusSection) { numberOfEvaluationSections--; }
   
   // Looping through every sections in the response, which are the evaluations for the corresponding member
-  for (var i = 0; i < _iMax; i++) {
+  for (var i = 0; i < numberOfEvaluationSections; i++) {
     var evaluatedFor = itemResponses[i].getItem().getTitle();
     assert(teamList[teamName].members.indexOf(evaluatedFor) >= 0, "Unexpected team member name, not in memberList: " + evaluatedFor);
     
@@ -199,7 +200,7 @@ function _generateEvaluationEntryForLeader(member, role, itemResponses, teamName
     for (var j = 0; j < rawEvaluations.length; j++) {
       evaluations[evaluationAspectsForMembers[j]] = rawEvaluations[j];
     }
-    evaluations['bonus'] = bonuses[currentMemberName];
+    evaluations['bonus'] = bonuses[evaluatedFor];
     
     var comment;
     if (itemResponses[itemResponses.length - 1] == undefined) {
@@ -228,7 +229,7 @@ function _generateEvaluationEntryForMember(member, role, itemResponses, teamName
   
   var evaluations = {};
   var rawEvaluations = itemResponses[0].getResponse();
-  assert(evaluationAspectsForMembers.length == rawEvaluations.length, "evaluationAspectsForMembers.length == rawEvaluations.length");
+  assert(evaluationAspectsForMembers.length == rawEvaluations.length, "evaluationAspectsForMembers.length != rawEvaluations.length");
   for (var i = 0; i < evaluationAspectsForMembers.length; i++) {
     evaluations[evaluationAspectsForMembers[i]] = rawEvaluations[i];
   }
@@ -239,7 +240,6 @@ function _generateEvaluationEntryForMember(member, role, itemResponses, teamName
   } else {
     comment = itemResponses[1].getResponse();
   }
-  
   
   var evaluationEntry = {};
   evaluationEntry.timestamp = timestamp;
