@@ -358,3 +358,38 @@ function findOrCreateSpreadsheet(fileName) {
   return resultFile;
 }
 
+// WARNING: TODO: FIX: Duplicated Code!!
+
+function openDocument(fileName) {
+  var possibleFiles = DriveApp.getFolderById(APAS_WORKING_FOLDER_ID).getFilesByName(fileName);
+  if (possibleFiles.hasNext()) {
+    
+    // Disregarding the result since we will return resultFile (which is a Spreadsheet object). 
+    // This line is to "get the next file" and prepare for the assert statement which tests if there is another file with the same name.
+    possibleFiles.next();    
+    
+    var resultFile = DocumentApp.openById(DriveApp.getFolderById(APAS_WORKING_FOLDER_ID).getFilesByName(fileName).next().getId());
+    assert(!possibleFiles.hasNext(), "Found another file with the same name: " + String(fileName));       // make sure there isn't another file with the same name
+    return resultFile;
+  } else {
+    return undefined;
+  }
+}
+
+
+function findOrCreateDocument(fileName) {
+  var resultFile = openDocument(fileName);
+  if (resultFile != undefined) {
+    return resultFile;
+  }
+
+  // Did not find a existing file, creating a new one
+  var possibleFiles = DriveApp.getFolderById(APAS_WORKING_FOLDER_ID).getFilesByName(fileName);
+  var document = DocumentApp.create(fileName);
+  var documentFile = DriveApp.getFileById(document.getId());
+  DriveApp.getFolderById(APAS_WORKING_FOLDER_ID).addFile(documentFile);
+  DriveApp.getRootFolder().removeFile(documentFile);
+  resultFile = DocumentApp.openById(DriveApp.getFolderById(APAS_WORKING_FOLDER_ID).getFilesByName(fileName).next().getId());
+  
+  return resultFile;
+}
