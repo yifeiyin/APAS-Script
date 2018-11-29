@@ -15,7 +15,7 @@ var COL_ROLEANDTEAMSTARTS = 7;
 
 
 function load_and_save_main_test() {
-
+  
 };
 
 
@@ -192,19 +192,46 @@ function printMemberList() {
 }
 
 // For debug only, print teamList
-function printTeams() {
-  for (teamName in teamList) {
-    info("======== " + teamName + " ========")
-    var theTeam = teamList[teamName]
-    
-    info("    ---- Leaders " + String(theTeam.leaders.length) + " ----")
-    for (var i = 0; i < theTeam.leaders.length; i++) 
-      info("      " + theTeam.leaders[i]) 
-    
-    info("    ---- Members " + String(theTeam.members.length) + " ----")
-    for (var i = 0; i < theTeam.members.length; i++) 
-      info("      " + theTeam.members[i]) 
+function mPrintTeams(memberlistName, teamlistFileName) {
+//  for (teamName in teamList) {
+//    info("======== " + teamName + " ========");
+//    var theTeam = teamList[teamName];
+//    
+//    info("    ---- Leaders " + String(theTeam.leaders.length) + " ----");
+//    for (var i = 0; i < theTeam.leaders.length; i++) 
+//      info("      " + theTeam.leaders[i]);
+//      
+//    info("    ---- Members " + String(theTeam.members.length) + " ----");
+//    for (var i = 0; i < theTeam.members.length; i++)
+//      info("      " + theTeam.members[i]);
+//  }
+//  
+  prepareConstants();
+  loadMemberList(memberlistName);
+  
+  // WARNING: TODO: Duplicated Code from generate-report.gs
+  var teamlistDocument = findOrCreateDocument(teamlistFileName);
+  function appendToTeamlistDocument(content, type) {
+    assert(teamlistDocument != undefined, "Need to initialize report before write!");
+    if (type == undefined || type == "text") {
+      teamlistDocument.appendParagraph(content);
+    } else if (type == "table") {
+      teamlistDocument.getBody().appendTable(content).setBorderColor("#999999").setColumnWidth(0, 60);
+    } else {
+      error("Unexpected type in appendToReport: " + type);
+    }
   }
+  
+  for (teamName in teamList) {
+    var tableToAppend = [];
+    
+    appendToTeamlistDocument(teamName);
+    tableToAppend.push(["Leader:"].concat(teamList[teamName].leaders));
+    tableToAppend.push(["Members:"].concat(teamList[teamName].members));
+    
+    appendToTeamlistDocument(tableToAppend, 'table');
+  }
+  info("Exiting mPrintTeams");
 }
 
 
@@ -232,13 +259,13 @@ function validateMemberList() {
     if (theTeam.leaders.length == 0)
       warning(teamName + " has no leaders.")
       
-    if (theTeam.leaders.length > 1)
-      warning(teamName + " has " + String(theTeam.leaders.length) + " leaders.")
-      
-    if (theTeam.members.length == 0)
-      warning(teamName + " has no members.")
-    
-    }
+      if (theTeam.leaders.length > 1)
+        warning(teamName + " has " + String(theTeam.leaders.length) + " leaders.")
+        
+        if (theTeam.members.length == 0)
+          warning(teamName + " has no members.")
+          
+          }
 }
 
 
@@ -346,7 +373,7 @@ function findOrCreateSpreadsheet(fileName) {
   if (resultFile != undefined) {
     return resultFile;
   }
-
+  
   // Did not find a existing file, creating a new one
   var possibleFiles = DriveApp.getFolderById(APAS_WORKING_FOLDER_ID).getFilesByName(fileName);
   var spreadsheet = SpreadsheetApp.create(fileName);
@@ -382,7 +409,7 @@ function findOrCreateDocument(fileName) {
   if (resultFile != undefined) {
     return resultFile;
   }
-
+  
   // Did not find a existing file, creating a new one
   var possibleFiles = DriveApp.getFolderById(APAS_WORKING_FOLDER_ID).getFilesByName(fileName);
   var document = DocumentApp.create(fileName);

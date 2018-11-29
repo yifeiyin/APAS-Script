@@ -87,8 +87,10 @@ function generateForms(folderName, destinationSsFileName) {
         "此问卷是程序自动为「" + member.name + "」生成的，发送到 " + member.email + "。\n" + 
           "如果你不是该人，请不要填写。\n\n" + 
             "如果名字、团队信息出现错误，请告知 Sandy。\n" + 
-              "如果想更改被显示的名字，" + 
-                "或者有任何其他问题、意见或建议，可直接在钉钉上联系 Yifei。😜";
+              "如果想更改被显示的名字，\n" + 
+                "或者有任何其他问题、意见或建议，可直接在钉钉上联系 Yifei。\n\n" +
+                  " 📱用手机填写时记得左右划一划看到所有选项哦！\n\n" + 
+                    "A: 100%\nA-: 95%\nB+: 90%\nB: 85%\nB-: 80%\nC: 60%\nF: 20%\nN/A: 表示信息有误或其他特殊情况(请在钉钉上详细说明)\n";
       var formConfirmationMessage = "谢谢使用。";
       
      
@@ -167,7 +169,8 @@ function _generateFormContentForLeader(form, member, role) {
     var paraTextItem = form.addParagraphTextItem();
     paraTextItem
     .setRequired(false)
-    .setTitle("补充信息（可选）");
+    .setTitle("给社团的建议")
+    .setHelpText("如果对社团或部门的工作有任何建议，请在这里留下你的想法");
   }
 }
 
@@ -199,7 +202,8 @@ function _generateFormContentForMember(form, member, role) {
     var paraTextItem = form.addParagraphTextItem();
     paraTextItem
     .setRequired(false)
-    .setTitle("补充信息（可选）");
+    .setTitle("给社团的建议")
+    .setHelpText("如果对社团或部门的工作有任何建议，请在这里留下你的想法");
   }
 }
 

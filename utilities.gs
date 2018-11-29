@@ -1,14 +1,19 @@
 var LOG_FILE_ID = "1gaxnWeGbGk3RXzU0sCVySvOedm1ttZYqEciowK7eDg4";
+var LONG_LOG_FILE_ID = "1wxHG0moc8fc7VBRaG9sopEiA_v0448Gs-H3VDyee-Uc"
 var __first_log = true;
-  
+
 function _log(prompt, msg) {
   var sheet = SpreadsheetApp.openById(LOG_FILE_ID).getSheets()[0];
+  var sheetLongLog = SpreadsheetApp.openById(LONG_LOG_FILE_ID).getSheets()[0];
+  var date = new Date();
   if (__first_log) {
     __first_log = false;
     sheet.clearContents();
+    sheetLongLog.appendRow(["'==============================================================================================="]);
   }
-  var date = new Date();
+  
   sheet.appendRow([date, prompt, msg]);
+  sheetLongLog.appendRow([date, prompt, msg]);
 }
 
 function info(msg) {
@@ -47,7 +52,7 @@ function _isTimeAlmostUp() {
   var now = new Date();
   var FIVE_MINS = 300000;
   var DEBUG_USE = 20 * 1000;
-  return now.getTime() - _program_start_time.getTime() > DEBUG_USE; // 5 minutes
+  return now.getTime() - _program_start_time.getTime() > FIVE_MINS; // 5 minutes
 }
 
 

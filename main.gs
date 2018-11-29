@@ -59,6 +59,7 @@ var memberlistName = "Testing, Member Info";
 var formFolderName = "forms";
 var destinationSpreadsheetName = "Destination Spreadsheet";
 var evaluationEntriesName = "Evaluation Entries";
+var reportName = "Testing Report";
 
 // Functions to call:
 /*
@@ -79,7 +80,7 @@ function selector_1_GenerateForms()      { mGenerateForms(memberlistName, formFo
 function selector_2_GenerateEmails()     { mGenerateEmails(memberlistName);                                                      }
 function selector_3_SendEmails()         { mSendEmails(memberlistName);                                                          }
 function selector_4_CollectResults()     { mCollectResults(memberlistName, evaluationEntriesName);                               }
-
+function selector_5_GenerateReport()     { mGenerateReport(memberlistName, evaluationEntriesName, reportName);                   }
 
 
 

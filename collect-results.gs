@@ -44,8 +44,12 @@ function saveEvaluationEntries(fileName) {
   var properties = [];
   for (var property in evaluationEntries[0])
     properties.push(property);
-  sheet.appendRow(properties);
+  var now = new Date();
+  var propertiesCopy = [].concat(properties);
+  propertiesCopy[0] = "Last updated: " + now.toLocaleString();
+  sheet.appendRow(propertiesCopy);  // Making a copy and change the first element so that it includes "last updated ..."
   
+
   for (var i = 0; i < evaluationEntries.length; i++) {
     var rowToAppend = [];
     for (var j = 0; j < properties.length; j++)
@@ -68,6 +72,7 @@ function loadEvaluationEntries(fileName) {
   var properties = [];
   for (var col = 0; col < values[0].length; col++) 
     properties.push(values[0][col]);
+  properties[0] = "timestamp";                     // Since we are using the first column to store other information, need to manually change it back
   
   for (var row = 1; row < values.length; row++) {
     var evaluationEntry = {};
@@ -137,6 +142,9 @@ function generateEvaluationEntries() {
       
       var form = FormApp.openById(formId);
       var responses = form.getResponses();
+      if (responses.length > 1) {
+        warning(quotes(member.name) + ", " + role.position + " of " + role.teamName + " has multiple responses: " + responses.length + " >> " + link);
+      }
       responses.sort(function(a, b) {return b.getTimestamp() - a.getTimestamp()});
       var latestResponse = responses[0];
       if (latestResponse == undefined) {
@@ -229,9 +237,9 @@ function _generateEvaluationEntryForMember(member, role, itemResponses, teamName
   
   var evaluations = {};
   var rawEvaluations = itemResponses[0].getResponse();
-  assert(evaluationAspectsForMembers.length == rawEvaluations.length, "evaluationAspectsForMembers.length != rawEvaluations.length");
-  for (var i = 0; i < evaluationAspectsForMembers.length; i++) {
-    evaluations[evaluationAspectsForMembers[i]] = rawEvaluations[i];
+  assert(evaluationAspectsForLeaders.length == rawEvaluations.length, "evaluationAspectsForLeaders.length != rawEvaluations.length");
+  for (var i = 0; i < evaluationAspectsForLeaders.length; i++) {
+    evaluations[evaluationAspectsForLeaders[i]] = rawEvaluations[i];
   }
   
   var comment;
