@@ -10,9 +10,15 @@ function generate_report_main_test() {
 
 
 var reportDocument = undefined;
-function appendToReport(text) {
+function appendToReport(content, type) {
   assert(reportDocument != undefined, "Need to initialize report before write!");
-  reportDocument.appendParagraph(text);
+  if (type == undefined || type == "text") {
+    reportDocument.appendParagraph(content);
+  } else if (type == "table") {
+    reportDocument.getBody().appendTable(content).setBorderColor("#ffffff");
+  } else {
+    error("Unexpected type in appendToReport: " + type);
+  }
 }
 
 /* Recall some variable names:
@@ -24,32 +30,45 @@ function mGenerateReport(memberlistName, evaluationEntriesName, reportName) {
   loadEvaluationEntries(evaluationEntriesName);
   reportDocument = findOrCreateDocument(reportName);
   
+  reportDocument.getBody().clear();
+  
+  var now = new Date();
+  appendToReport("Last Updated On: " + now.toLocaleString());
   for (var iTeamName = 0; iTeamName < allTeamNames.length; iTeamName++) {
-    var teamName = allTeamNames[iTeamName];
     
     // Check time out here
     
-    appendToReport("------------------------");
-    appendToReport(teamName);
+    var teamName = allTeamNames[iTeamName];
+    var tableToAppend = [];
+
+    tableToAppend.push([teamName]);
     
     var people = teamList[teamName].leaders.concat(teamList[teamName].members); // array.concat does not change exisiting arrays
     
     for (var iPeople = 0; iPeople < people.length; iPeople++) {
       var peopleName = people[iPeople];
-      
-      var entries = findEvaluationEntriesFor(peopleName);
+      var entries = findEvaluationEntriesFor(peopleName, teamName);
       var mark = calculateMarksBaseOn(entries);
-      appendToReport("    " + peopleName + Array(30 - peopleName.length > 0? 30 - peopleName.length : 0).join(' ') + " " + mark);
       
+      // New Feature: missingResponseFrom
+      if (missingResponseFrom != undefined && missingResponseFrom.indexOf("#" + teamName + peopleName) >= 0) {
+        // This person is missing a response
+        peopleName += "（未填写问卷）";
+      }
+      
+      tableToAppend.push([peopleName, mark]);
     }
+    appendToReport(tableToAppend, "table");
   }
+  info("Report saved to " + reportName);
 }
 
+
 // Returns a list of "evaluationEntries"
-function findEvaluationEntriesFor(peopleName) {
+function findEvaluationEntriesFor(peopleName, teamName) {
   result = [];
   for (var i = 0; i < evaluationEntries.length; i++) {
-    if (evaluationEntries[i].evaluatedFor == peopleName)
+    if (evaluationEntries[i].evaluatedFor == peopleName && evaluationEntries[i].teamName == teamName)
       result.push(evaluationEntries[i]);
   }
   return result;
@@ -84,7 +103,7 @@ function calculateMarksBaseOn(evaluationEntries) {
   */
   var SUBevaluationAspectsForMembers = ["关怀度", "执行力", "计划性", "沟通力"];
   var ratingToMark = {"N/A":  0, 
-                        "F"  : 10, 
+                        "F"  : 20, 
                         "C"  : 60, 
                         "B-" : 80, 
                         "B"  : 85, 

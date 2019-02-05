@@ -2,7 +2,11 @@ function collect_result_main_test() {
 }
 
 var evaluationEntries = [];
-
+// New Feature: missingResponseFrom
+// Structure:   "#TeamnameMembername#TeamnameMembername..."
+// Each entry starts with a hash, and then teamname, membername, nothing inbetween.
+// This way it's easier to look up.
+var missingResponseFrom = "";
 var MEMBER_E_LEADER = "Member Evaluates Leader";
 var LEADER_E_MEMBER = "Leader Evaluates Member";
 
@@ -67,7 +71,7 @@ function loadEvaluationEntries(fileName) {
     warning(err + " Did not load evaluation entries: " + quotes(fileName) + " not found")
     return
   }
-  
+  evaluationEntries = [];     // Initialize variable one more time
   var values = sheet.getDataRange().getDisplayValues();
   var properties = [];
   for (var col = 0; col < values[0].length; col++) 
@@ -148,6 +152,8 @@ function generateEvaluationEntries() {
       responses.sort(function(a, b) {return b.getTimestamp() - a.getTimestamp()});
       var latestResponse = responses[0];
       if (latestResponse == undefined) {
+        // New Feature: missingResponseFrom
+        missingResponseFrom += "#" + role.teamName + member.name;
         info(quotes(member.name) + ", " + role.position + " of " + role.teamName + " does not have a response.");
         continue;
       }
